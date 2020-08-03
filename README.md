@@ -351,6 +351,30 @@ There was an error: apples must weigh more than 0 ounces
 > Logged at Mon Aug  5 02:17:10 2019
 ```
 
+# Writing Python's @classmethod
+In python, we have a similar decorator to properly decorate member functions: `@classmethod`. This decorator specifically tells the interpreter to pass `self` into the decorator chain, if used, so that the member function can be called correctly- specifically in the event of inherited member functions. [Further reading on stackoverflow](https://stackoverflow.com/questions/3782040/python-decorators-that-are-part-of-a-base-class-cannot-be-used-to-decorate-membe)
+
+We needed to pass the instance of the object into the decorator chain and with a quick re-write we can make this class visitor decorate function universal.
+
+Simply swap out `apples&` for `auto&`:
+
+[goto godbolt](https://godbolt.org/z/nQpdfN)
+
+```cpp
+////////////////////////////////////
+//    visitor function            //
+////////////////////////////////////
+
+template<typename F>
+constexpr auto classmethod(F func) {
+    return [func](auto& a, auto&&... args) {
+        return (a.*func)(args...);
+    };
+}
+```
+
+Now we can visit any class type member function.
+
 # After-thoughts
 Unlike python, C++ doesn't let us redefine functions on the fly, but we could get closer to python syntax if we had some kind of intermediary functor type that we could reassign e.g.
 
